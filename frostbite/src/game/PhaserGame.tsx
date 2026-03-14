@@ -3,14 +3,18 @@ import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { WorldScene } from './scenes/WorldScene';
 
-export function PhaserGame() {
+interface Props {
+  onGameReady: (game: Phaser.Game) => void;
+}
+
+export function PhaserGame({ onGameReady }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const gameRef = useRef<Phaser.Game | null>(null);
 
   useEffect(() => {
     if (!containerRef.current || gameRef.current) return;
 
-    gameRef.current = new Phaser.Game({
+    const game = new Phaser.Game({
       type: Phaser.AUTO,
       parent: containerRef.current,
       width: window.innerWidth,
@@ -26,11 +30,22 @@ export function PhaserGame() {
         autoCenter: Phaser.Scale.CENTER_BOTH,
       },
     });
+    gameRef.current = game;
+
+    // Listen for extra-axe upgrade and forward to WorldScene
+    game.events.on('upgrade:extra-axe', () => {
+      const worldScene = game.scene.getScene('WorldScene') as WorldScene | null;
+      worldScene?.addWeapon();
+    });
+
+    onGameReady(game);
 
     return () => {
       gameRef.current?.destroy(true);
       gameRef.current = null;
     };
+  // onGameReady is stable (defined inline in App) — dep array intentionally empty
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

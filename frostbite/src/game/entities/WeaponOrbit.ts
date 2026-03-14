@@ -3,8 +3,8 @@ import { Player } from './Player';
 
 export class WeaponOrbit extends Phaser.GameObjects.Rectangle {
   private player: Player;
-  private orbitRadius: number;
-  private orbitSpeed: number; // radians per ms
+  orbitRadius: number;
+  orbitSpeed: number; // radians per ms
   private currentAngle: number;
   angleOffset: number;
   damage: number = 1;
@@ -14,13 +14,13 @@ export class WeaponOrbit extends Phaser.GameObjects.Rectangle {
   constructor(
     scene: Phaser.Scene,
     player: Player,
-    orbitRadius: number = 80,
+    _slotIndex: number = 1,
     angleOffset: number = 0,
     orbitSpeed: number = 0.002
   ) {
     super(scene, player.x, player.y, 16, 8, 0xdd3333);
     this.player = player;
-    this.orbitRadius = orbitRadius;
+    this.orbitRadius = 80;
     this.orbitSpeed = orbitSpeed;
     this.currentAngle = angleOffset;
     this.angleOffset = angleOffset;
