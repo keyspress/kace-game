@@ -48,9 +48,9 @@ export class WorldScene extends Phaser.Scene {
     // One axe to start (upgrades can add more)
     this.addWeapon();
 
-    // Spawn forest trees
+    // Spawn forest trees (y offset -24 so center-origin tree sits at intended ground point)
     FOREST_TREES.forEach(({ x, y }) => {
-      const tree = new Tree(this, cx + x, cy + y);
+      const tree = new Tree(this, cx + x, cy + y - 24);
       this.trees.push(tree);
     });
 

@@ -16,7 +16,6 @@ export class Tree extends Phaser.GameObjects.Rectangle {
     this.spawnY = y;
     scene.add.existing(this);
     scene.physics.add.existing(this, true);
-    this.setOrigin(0.5, 1);
     this.setDepth(y);
   }
 
