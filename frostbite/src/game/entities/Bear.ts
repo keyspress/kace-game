@@ -56,7 +56,13 @@ export class Bear extends Phaser.GameObjects.Rectangle {
     // Screen shake via camera
     scene.cameras.main.shake(250, 0.012);
 
-    new ResourceDrop(scene, this.x, this.y, 'meat', 2);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pool = (scene as any).dropPool ?? null;
+    if (pool) {
+      pool.spawn(scene, this.x, this.y, 'meat', 2);
+    } else {
+      new ResourceDrop(scene, this.x, this.y, 'meat', 2);
+    }
     this.destroy();
 
     const sx = this.spawnX;

@@ -77,7 +77,13 @@ export class Tree extends Phaser.GameObjects.Rectangle {
 
   private die(scene: Phaser.Scene): void {
     this.isAlive = false;
-    new ResourceDrop(scene, this.x, this.y, this.resourceType, 1);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pool = (scene as any).dropPool ?? null;
+    if (pool) {
+      pool.spawn(scene, this.x, this.y, this.resourceType, 1);
+    } else {
+      new ResourceDrop(scene, this.x, this.y, this.resourceType, 1);
+    }
     this.destroy();
 
     const sx = this.spawnX;

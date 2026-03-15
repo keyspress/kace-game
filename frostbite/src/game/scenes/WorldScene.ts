@@ -5,6 +5,7 @@ import { Tree } from '../entities/Tree';
 import { Bear } from '../entities/Bear';
 import { InputSystem } from '../systems/InputSystem';
 import { ZoneSystem } from '../systems/ZoneSystem';
+import { ResourceDropPool } from '../systems/ResourceDropPool';
 import { audioSystem } from '../systems/AudioSystem';
 import { useGameStore } from '../../store/gameStore';
 
@@ -40,6 +41,7 @@ export class WorldScene extends Phaser.Scene {
   private bears: Bear[] = [];
   private zoneSystem!: ZoneSystem;
   private snow!: Phaser.GameObjects.Particles.ParticleEmitter;
+  dropPool: ResourceDropPool = new ResourceDropPool();
 
   constructor() {
     super({ key: 'WorldScene' });
