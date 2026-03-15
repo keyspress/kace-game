@@ -12,11 +12,13 @@ export function UpgradeShop({ gameEvents }: Props) {
   const [open, setOpen] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
 
-  const wood     = useGameStore((s) => s.wood);
-  const meat     = useGameStore((s) => s.meat);
-  const upgrades = useGameStore((s) => s.upgrades);
-  const spendResource    = useGameStore((s) => s.spendResource);
-  const purchaseUpgrade  = useGameStore((s) => s.purchaseUpgrade);
+  const wood          = useGameStore((s) => s.wood);
+  const meat          = useGameStore((s) => s.meat);
+  const stone         = useGameStore((s) => s.stone);
+  const upgrades      = useGameStore((s) => s.upgrades);
+  const unlockedZones = useGameStore((s) => s.unlockedZones);
+  const spendResource   = useGameStore((s) => s.spendResource);
+  const purchaseUpgrade = useGameStore((s) => s.purchaseUpgrade);
 
   const openShop = () => {
     setOpen(true);
@@ -28,7 +30,6 @@ export function UpgradeShop({ gameEvents }: Props) {
     gameEvents?.emit('shop:close');
   };
 
-  // Close on outside tap
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent | TouchEvent) => {
@@ -51,24 +52,25 @@ export function UpgradeShop({ gameEvents }: Props) {
     const level = upgrades[id] ?? 0;
     if (level >= def.maxLevel) return;
     const cost = upgradeCost(def, level);
-    const resources: Record<string, number> = { wood, meat };
+    const resources: Record<string, number> = { wood, meat, stone };
     if ((resources[def.costResource] ?? 0) < cost) return;
 
     const ok = spendResource(def.costResource, cost);
     if (!ok) return;
     purchaseUpgrade(id);
 
-    // Trigger extra-axe effect via game event
     if (def.special === 'extra-axe') {
       gameEvents?.emit('upgrade:extra-axe');
     }
   };
 
-  const resources: Record<string, number> = { wood, meat };
+  const resources: Record<string, number> = { wood, meat, stone };
+  const visibleUpgrades = UPGRADES.filter(
+    (def) => !def.requiredZone || unlockedZones.includes(def.requiredZone)
+  );
 
   return (
     <>
-      {/* Shop button — bottom right */}
       <button
         onClick={openShop}
         style={{
@@ -89,18 +91,10 @@ export function UpgradeShop({ gameEvents }: Props) {
         🪓 Shop
       </button>
 
-      {/* Backdrop */}
       {open && (
-        <div
-          style={{
-            position: 'absolute', inset: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 30,
-          }}
-        />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 30 }} />
       )}
 
-      {/* Drawer */}
       <div
         ref={drawerRef}
         style={{
@@ -131,10 +125,10 @@ export function UpgradeShop({ gameEvents }: Props) {
         </div>
 
         <div style={{ display: 'grid', gap: 10 }}>
-          {UPGRADES.map((def) => {
-            const level = upgrades[def.id] ?? 0;
-            const maxed = level >= def.maxLevel;
-            const cost  = upgradeCost(def, level);
+          {visibleUpgrades.map((def) => {
+            const level     = upgrades[def.id] ?? 0;
+            const maxed     = level >= def.maxLevel;
+            const cost      = upgradeCost(def, level);
             const canAfford = (resources[def.costResource] ?? 0) >= cost;
 
             return (

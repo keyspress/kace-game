@@ -9,6 +9,8 @@ export interface UpgradeDef {
   maxLevel: number;
   /** special: 'extra-axe' triggers addWeapon() on the scene */
   special?: 'extra-axe';
+  /** zone that must be unlocked before this upgrade appears */
+  requiredZone?: string;
 }
 
 export const UPGRADES: UpgradeDef[] = [
@@ -63,14 +65,24 @@ export const UPGRADES: UpgradeDef[] = [
     baseCost: 40,
     maxLevel: 8,
   },
-  // Explorer upgrades (cost: wood for now, stone when unlocked)
+  // Explorer upgrades (cost: stone — unlocked with Rocky Tundra)
   {
     id: 'move-speed',
     label: 'Move Speed',
     description: '+20 movement speed',
-    costResource: 'wood',
-    baseCost: 50,
+    costResource: 'stone',
+    baseCost: 30,
     maxLevel: 8,
+    requiredZone: 'rocky-tundra',
+  },
+  {
+    id: 'collect-speed',
+    label: 'Collect Speed',
+    description: 'Resources arc faster',
+    costResource: 'stone',
+    baseCost: 25,
+    maxLevel: 5,
+    requiredZone: 'rocky-tundra',
   },
 ];
 

@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
 import { ResourceDrop } from './ResourceDrop';
+import { audioSystem } from '../systems/AudioSystem';
 
 export class Bear extends Phaser.GameObjects.Rectangle {
   health: number = 8;
   readonly id: number;
-  private static nextId: number = 10000; // distinct range from Tree ids
+  private static nextId: number = 10000;
   private isAlive: boolean = true;
   private spawnX: number;
   private spawnY: number;
@@ -33,11 +34,14 @@ export class Bear extends Phaser.GameObjects.Rectangle {
   hit(damage: number, scene: Phaser.Scene): void {
     if (!this.isAlive) return;
     this.health -= damage;
+
+    audioSystem.playBearHit();
+    scene.events.emit('damage', this.x, this.y - 20, damage);
+
     this.setFillStyle(0xff4444);
     scene.time.delayedCall(150, () => {
       if (this.active) this.setFillStyle(0x5a3a1a);
     });
-    // Stagger for 300ms
     this.staggerUntil = scene.time.now + 300;
 
     if (this.health <= 0) {
@@ -47,10 +51,14 @@ export class Bear extends Phaser.GameObjects.Rectangle {
 
   private die(scene: Phaser.Scene): void {
     this.isAlive = false;
+    audioSystem.playBearDeath();
+
+    // Screen shake via camera
+    scene.cameras.main.shake(250, 0.012);
+
     new ResourceDrop(scene, this.x, this.y, 'meat', 2);
     this.destroy();
 
-    // Respawn after 20 seconds
     const sx = this.spawnX;
     const sy = this.spawnY;
     scene.time.delayedCall(20_000, () => {
@@ -70,7 +78,6 @@ export class Bear extends Phaser.GameObjects.Rectangle {
     this.wanderTargetX = this.spawnX + Math.cos(angle) * dist;
     this.wanderTargetY = this.spawnY + Math.sin(angle) * dist;
 
-    // Pick a new target after reaching this one (or after a timeout)
     scene.time.delayedCall(Phaser.Math.Between(2000, 5000), () => {
       if (this.active) this.pickNewWanderTarget(scene);
     });
@@ -87,7 +94,6 @@ export class Bear extends Phaser.GameObjects.Rectangle {
       return;
     }
 
-    // Move toward current wander target
     const dx = this.wanderTargetX - this.x;
     const dy = this.wanderTargetY - this.y;
     const dist = Math.sqrt(dx * dx + dy * dy);

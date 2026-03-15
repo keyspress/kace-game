@@ -12,5 +12,6 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     this.scene.start('WorldScene');
+    this.scene.launch('UIScene'); // runs in parallel on top of WorldScene
   }
 }

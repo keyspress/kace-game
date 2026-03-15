@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene';
 import { WorldScene } from './scenes/WorldScene';
+import { UIScene } from './scenes/UIScene';
 
 interface Props {
   onGameReady: (game: Phaser.Game) => void;
@@ -24,7 +25,7 @@ export function PhaserGame({ onGameReady }: Props) {
         default: 'arcade',
         arcade: { debug: false },
       },
-      scene: [BootScene, WorldScene],
+      scene: [BootScene, WorldScene, UIScene],
       scale: {
         mode: Phaser.Scale.RESIZE,
         autoCenter: Phaser.Scale.CENTER_BOTH,
