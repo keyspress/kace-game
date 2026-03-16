@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { Player } from '../entities/Player';
 import { WeaponOrbit } from '../entities/WeaponOrbit';
+import { FireballOrbit } from '../entities/FireballOrbit';
 import { Tree } from '../entities/Tree';
 import { Bear } from '../entities/Bear';
 import { InputSystem } from '../systems/InputSystem';
@@ -10,6 +11,8 @@ import { audioSystem } from '../systems/AudioSystem';
 import { useGameStore } from '../../store/gameStore';
 
 export type CharacterType = 'knight' | 'mage' | 'rogue';
+
+type AnyWeapon = WeaponOrbit | FireballOrbit;
 
 const FOREST_TREES: { x: number; y: number }[] = [
   { x:  150, y:   60 }, { x: -120, y:   80 }, { x:  220, y: -100 },
@@ -38,7 +41,7 @@ const TUNDRA_TREE_POSITIONS: { x: number; y: number }[] = [
 
 export class WorldScene extends Phaser.Scene {
   player!: Player;
-  weapons: WeaponOrbit[] = [];
+  weapons: AnyWeapon[] = [];
   private trees: Tree[] = [];
   private bears: Bear[] = [];
   private zoneSystem!: ZoneSystem;
@@ -78,13 +81,35 @@ export class WorldScene extends Phaser.Scene {
     this.input.once('pointerdown', () => audioSystem.startWind());
   }
 
+  private createWeapon(character: CharacterType, slotIndex: number, angleOffset: number): AnyWeapon {
+    if (character === 'mage') {
+      const fb = new FireballOrbit(this, this.player, slotIndex, angleOffset);
+      fb.angleOffset = angleOffset;
+      return fb;
+    }
+    const axe = new WeaponOrbit(this, this.player, slotIndex, angleOffset);
+    axe.angleOffset = angleOffset;
+    return axe;
+  }
+
   addWeapon(): void {
+    const character = useGameStore.getState().activeCharacter;
     const count = this.weapons.length;
     const spacing = (Math.PI * 2) / (count + 1);
     this.weapons.forEach((w, i) => { w.angleOffset = spacing * i; });
-    const axe = new WeaponOrbit(this, this.player, count + 1);
-    axe.angleOffset = spacing * count;
-    this.weapons.push(axe);
+    const weapon = this.createWeapon(character, count + 1, spacing * count);
+    this.weapons.push(weapon);
+    this.setupOverlaps();
+  }
+
+  private rebuildWeapons(character: CharacterType): void {
+    const count = this.weapons.length;
+    this.weapons.forEach((w) => w.destroy());
+    this.weapons = [];
+    const spacing = (Math.PI * 2) / count;
+    for (let i = 0; i < count; i++) {
+      this.weapons.push(this.createWeapon(character, i + 1, spacing * i));
+    }
     this.setupOverlaps();
   }
 
@@ -112,7 +137,7 @@ export class WorldScene extends Phaser.Scene {
 
     this.weapons.forEach((weapon) => {
       this.physics.add.overlap(weapon, this.trees, (_axe, _tree) => {
-        const w = _axe as WeaponOrbit;
+        const w = _axe as AnyWeapon;
         const t = _tree as Tree;
         const time = this.time.now;
         if (w.canHit(t.id, time)) {
@@ -123,7 +148,7 @@ export class WorldScene extends Phaser.Scene {
       });
 
       this.physics.add.overlap(weapon, this.bears, (_axe, _bear) => {
-        const w = _axe as WeaponOrbit;
+        const w = _axe as AnyWeapon;
         const b = _bear as Bear;
         const time = this.time.now;
         if (w.canHit(b.id, time)) {
@@ -137,7 +162,10 @@ export class WorldScene extends Phaser.Scene {
 
   addTree(tree: Tree): void { this.trees.push(tree); this.setupOverlaps(); }
   addBear(bear: Bear): void { this.bears.push(bear); this.setupOverlaps(); }
-  switchCharacter(character: CharacterType): void { this.player.switchCharacter(character); }
+  switchCharacter(character: CharacterType): void {
+    this.player.switchCharacter(character);
+    this.rebuildWeapons(character);
+  }
   playerJump(): void { this.player.jump(this); }
 
   private createSnow(): void {

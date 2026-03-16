@@ -22,6 +22,8 @@ export class BootScene extends Phaser.Scene {
     for (let i = 1; i <= 14; i++) this.load.image(`mage-idle-${i}`, `assets/Mage/Idle/idle${i}.png`);
     for (let i = 1; i <= 8;  i++) this.load.image(`mage-run-${i}`,  `assets/Mage/Run/run${i}.png`);
     for (let i = 1; i <= 7;  i++) this.load.image(`mage-jump-${i}`, `assets/Mage/Jump/jump${i}.png`);
+    // Mage fireball frames
+    for (let i = 1; i <= 9;  i++) this.load.image(`fireball-${i}`,  `assets/Mage/Fire/fire${i}.png`);
     this.load.image('axe',              'assets/Axe.png');
     this.load.image('tree',             'assets/Tree.png');
     this.load.image('rock',             'assets/Rock.png');
