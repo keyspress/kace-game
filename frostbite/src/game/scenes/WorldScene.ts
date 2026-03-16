@@ -15,30 +15,44 @@ export type CharacterType = 'knight' | 'mage' | 'rogue';
 
 type AnyWeapon = WeaponOrbit | FireballOrbit | KnifeOrbit;
 
-const FOREST_TREES: { x: number; y: number }[] = [
-  { x:  150, y:   60 }, { x: -120, y:   80 }, { x:  220, y: -100 },
-  { x: -200, y: -130 }, { x:   80, y:  180 }, { x: -160, y:  200 },
-  { x:  300, y:  120 }, { x: -280, y:   20 }, { x:  100, y: -220 },
-  { x: -100, y: -240 }, { x:  250, y: -200 }, { x: -250, y:  160 },
-  { x:  380, y:  -60 }, { x: -340, y: -100 }, { x:  160, y:  300 },
-  { x: -180, y:  320 }, { x:  420, y:  200 }, { x: -400, y:  240 },
-  { x:   40, y: -300 }, { x:  -60, y:  -340 },
-];
+// Generate a dense, evenly-distributed forest using a seeded grid with jitter
+function generateTreeGrid(
+  cols: number, rows: number,
+  spacingX: number, spacingY: number,
+  clearRadius: number = 90
+): { x: number; y: number }[] {
+  const positions: { x: number; y: number }[] = [];
+  const offsetX = ((cols - 1) * spacingX) / 2;
+  const offsetY = ((rows - 1) * spacingY) / 2;
+  // Simple deterministic pseudo-random using index
+  let seed = 42;
+  function rand(): number { seed = (seed * 1664525 + 1013904223) & 0xffffffff; return (seed >>> 0) / 0xffffffff; }
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const x = col * spacingX - offsetX + (rand() - 0.5) * spacingX * 0.7;
+      const y = row * spacingY - offsetY + (rand() - 0.5) * spacingY * 0.7;
+      // Leave a clear circle around the player spawn
+      if (Math.sqrt(x * x + y * y) < clearRadius) continue;
+      positions.push({ x: Math.round(x), y: Math.round(y) });
+    }
+  }
+  return positions;
+}
+
+const FOREST_TREES = generateTreeGrid(22, 18, 90, 80, 90);
 
 export const BEAR_ZONE_OFFSET_X = 900;
 const BEAR_SPAWN_POSITIONS: { x: number; y: number }[] = [
   { x:  100, y:   50 }, { x:  -80, y:  120 }, { x:  200, y:  -80 },
   { x: -150, y: -100 }, { x:   50, y:  200 }, { x: -200, y:  180 },
-  { x:  280, y:   80 }, { x: -260, y:  -40 },
+  { x:  280, y:   80 }, { x: -260, y:  -40 }, { x:  350, y: -160 },
+  { x: -320, y:  220 }, { x:  180, y:  300 }, { x:  -60, y: -280 },
 ];
+const BEAR_ZONE_TREES = generateTreeGrid(16, 14, 90, 80, 0);
 
 export const TUNDRA_ZONE_OFFSET_X = 1900;
-const TUNDRA_TREE_POSITIONS: { x: number; y: number }[] = [
-  { x:  80,  y:   40 }, { x: -100, y:  100 }, { x:  180, y:  -60 },
-  { x: -160, y:  -80 }, { x:  260, y:  120 }, { x: -240, y:  160 },
-  { x:  120, y: -180 }, { x:  -80, y: -200 }, { x:  320, y:  -20 },
-  { x: -300, y:   60 },
-];
+const TUNDRA_TREE_POSITIONS = generateTreeGrid(14, 12, 90, 80, 0);
 
 export class WorldScene extends Phaser.Scene {
   player!: Player;
@@ -122,6 +136,9 @@ export class WorldScene extends Phaser.Scene {
   spawnBears(): void {
     const cx = this.scale.width / 2;
     const cy = this.scale.height / 2;
+    BEAR_ZONE_TREES.forEach(({ x, y }) => {
+      this.trees.push(new Tree(this, cx + BEAR_ZONE_OFFSET_X + x, cy + y - 24));
+    });
     BEAR_SPAWN_POSITIONS.forEach(({ x, y }) => {
       this.bears.push(new Bear(this, cx + BEAR_ZONE_OFFSET_X + x, cy + y));
     });
