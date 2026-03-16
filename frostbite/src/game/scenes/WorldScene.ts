@@ -44,27 +44,30 @@ function generateTreeGrid(
 
 const FOREST_TREES = generateTreeGrid(22, 18, 90, 80, 90);
 
-export const BEAR_ZONE_OFFSET_X = 900;
+export const BEAR_ZONE_OFFSET_X = 1200;
 const BEAR_SPAWN_POSITIONS: { x: number; y: number }[] = [
   { x:  100, y:   50 }, { x:  -80, y:  120 }, { x:  200, y:  -80 },
   { x: -150, y: -100 }, { x:   50, y:  200 }, { x: -200, y:  180 },
   { x:  280, y:   80 }, { x: -260, y:  -40 }, { x:  350, y: -160 },
   { x: -320, y:  220 }, { x:  180, y:  300 }, { x:  -60, y: -280 },
+  { x:  420, y:  -40 }, { x: -380, y:  -80 }, { x:  300, y:  340 },
+  { x: -280, y:  360 }, { x:  460, y:  180 }, { x:  -20, y:  380 },
 ];
-const BEAR_ZONE_TREES = generateTreeGrid(16, 14, 90, 80, 0);
+const BEAR_ZONE_TREES = generateTreeGrid(24, 20, 90, 80, 0);
 
-export const TUNDRA_ZONE_OFFSET_X = 1900;
-const TUNDRA_TREE_POSITIONS = generateTreeGrid(14, 12, 90, 80, 0);
+export const TUNDRA_ZONE_OFFSET_X = 2600;
+const TUNDRA_TREE_POSITIONS = generateTreeGrid(20, 18, 90, 80, 0);
 
 // Desert sits below the forest (positive Y offset)
-export const DESERT_ZONE_OFFSET_Y = 900;
-// Sparse cacti — use rock texture with green tint, fewer and more spread out
-const DESERT_CACTUS_POSITIONS = generateTreeGrid(12, 10, 120, 100, 0).filter((_, i) => i % 3 !== 0);
+export const DESERT_ZONE_OFFSET_Y = 1200;
+const DESERT_CACTUS_POSITIONS = generateTreeGrid(18, 14, 130, 110, 0).filter((_, i) => i % 3 !== 0);
 const SCORPION_SPAWN_POSITIONS: { x: number; y: number }[] = [
-  { x:  80,  y:  60 }, { x: -100, y:  140 }, { x:  220, y: -60 },
-  { x: -180, y: -80 }, { x:  320, y:  100 }, { x: -280, y: 160 },
-  { x:  100, y: -200 }, { x:  -60, y: 220 }, { x:  260, y: -160 },
-  { x: -220, y: -180 },
+  { x:  80,  y:   60 }, { x: -100, y:  140 }, { x:  220, y:  -60 },
+  { x: -180, y:  -80 }, { x:  320, y:  100 }, { x: -280, y:  160 },
+  { x:  100, y: -200 }, { x:  -60, y:  220 }, { x:  260, y: -160 },
+  { x: -220, y: -180 }, { x:  420, y:   40 }, { x: -380, y:   80 },
+  { x:  160, y:  300 }, { x: -140, y: -300 }, { x:  360, y: -280 },
+  { x: -340, y:  280 },
 ];
 
 export class WorldScene extends Phaser.Scene {
@@ -289,14 +292,14 @@ export class WorldScene extends Phaser.Scene {
     const by = this.scale.height / 2;
     const bearGraphics = this.add.graphics();
     bearGraphics.fillStyle(0xe8d8c5, 0.35);
-    bearGraphics.fillRect(bx - 400, by - 400, 900, 800);
+    bearGraphics.fillRect(bx - 600, by - 600, 1400, 1200);
     bearGraphics.setDepth(-999);
 
     // Tundra zone cool-grey overlay (starts hidden, revealed on unlock)
     const tx = this.scale.width / 2 + TUNDRA_ZONE_OFFSET_X;
     const tundraGraphics = this.add.graphics();
     tundraGraphics.fillStyle(0xaabbcc, 0.4);
-    tundraGraphics.fillRect(tx - 400, by - 400, 900, 800);
+    tundraGraphics.fillRect(tx - 600, by - 600, 1400, 1200);
     tundraGraphics.setAlpha(0);
     tundraGraphics.setDepth(-999);
 
@@ -305,7 +308,7 @@ export class WorldScene extends Phaser.Scene {
     const dy2 = this.scale.height / 2 + DESERT_ZONE_OFFSET_Y;
     const desertGraphics = this.add.graphics();
     desertGraphics.fillStyle(0xe8c97a, 0.5);
-    desertGraphics.fillRect(dcx - 700, dy2 - 400, 1400, 900);
+    desertGraphics.fillRect(dcx - 900, dy2 - 600, 1800, 1400);
     desertGraphics.setAlpha(0);
     desertGraphics.setDepth(-999);
 
