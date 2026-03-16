@@ -268,7 +268,45 @@ export class WorldScene extends Phaser.Scene {
     this.snow.setDepth(9000);     // above everything except UI
   }
 
+  private makeSandTiles(): void {
+    if (this.textures.exists('sand-light')) return;
+
+    const tileW = 64;
+    const tileH = 32;
+
+    // Light sand tile
+    const gl = this.make.graphics({ x: 0, y: 0 });
+    gl.fillStyle(0xe8c96a, 1);
+    gl.fillPoints([
+      { x: tileW / 2, y: 0 },
+      { x: tileW,     y: tileH / 2 },
+      { x: tileW / 2, y: tileH },
+      { x: 0,         y: tileH / 2 },
+    ], true);
+    // subtle noise dots
+    gl.fillStyle(0xd4b555, 0.4);
+    [[16,12],[40,8],[52,18],[24,22],[8,16],[48,26]].forEach(([nx,ny]) => gl.fillRect(nx,ny,2,1));
+    gl.generateTexture('sand-light', tileW, tileH);
+    gl.destroy();
+
+    // Dark sand tile
+    const gd = this.make.graphics({ x: 0, y: 0 });
+    gd.fillStyle(0xd4ae52, 1);
+    gd.fillPoints([
+      { x: tileW / 2, y: 0 },
+      { x: tileW,     y: tileH / 2 },
+      { x: tileW / 2, y: tileH },
+      { x: 0,         y: tileH / 2 },
+    ], true);
+    gd.fillStyle(0xc49a40, 0.4);
+    [[20,10],[44,6],[56,20],[12,24],[36,28],[50,14]].forEach(([nx,ny]) => gd.fillRect(nx,ny,2,1));
+    gd.generateTexture('sand-dark', tileW, tileH);
+    gd.destroy();
+  }
+
   private drawFloor(): void {
+    this.makeSandTiles();
+
     // Tile images are 1024×1536; display as 64×32 isometric diamonds
     const tileW = 64;
     const tileH = 32;
@@ -276,13 +314,38 @@ export class WorldScene extends Phaser.Scene {
     const scaleY = tileH / 1536;
     const range = 80;
 
+    // World origin in screen space
+    const ox = this.scale.width / 2;
+    const oy = this.scale.height / 2;
+
+    // Desert bounds in world space (relative to world origin)
+    const desertTop    = DESERT_ZONE_OFFSET_Y - 700;
+    const desertBottom = DESERT_ZONE_OFFSET_Y + 700;
+    const desertLeft   = -900;
+    const desertRight  =  900;
+
     for (let row = -range; row < range; row++) {
       for (let col = -range; col < range * 3; col++) {
         const isoX = (col - row) * (tileW / 2);
         const isoY = (col + row) * (tileH / 2);
-        const key = (col + row) % 2 === 0 ? 'ground-light' : 'ground-dark';
-        const tile = this.add.image(isoX + tileW / 2, isoY + tileH / 2, key);
-        tile.setScale(scaleX, scaleY);
+        const worldX = isoX + tileW / 2;
+        const worldY = isoY + tileH / 2;
+
+        // Check if this tile falls in the desert region
+        const relX = worldX - ox;
+        const relY = worldY - oy;
+        const inDesert = relY > desertTop && relY < desertBottom
+                      && relX > desertLeft && relX < desertRight;
+
+        let key: string;
+        if (inDesert) {
+          key = (col + row) % 2 === 0 ? 'sand-light' : 'sand-dark';
+        } else {
+          key = (col + row) % 2 === 0 ? 'ground-light' : 'ground-dark';
+        }
+
+        const tile = this.add.image(worldX, worldY, key);
+        if (!inDesert) tile.setScale(scaleX, scaleY);
         tile.setDepth(-1000);
       }
     }
@@ -303,18 +366,10 @@ export class WorldScene extends Phaser.Scene {
     tundraGraphics.setAlpha(0);
     tundraGraphics.setDepth(-999);
 
-    // Desert zone warm sand overlay (starts hidden, revealed on unlock)
-    const dcx = this.scale.width / 2;
-    const dy2 = this.scale.height / 2 + DESERT_ZONE_OFFSET_Y;
-    const desertGraphics = this.add.graphics();
-    desertGraphics.fillStyle(0xe8c97a, 0.5);
-    desertGraphics.fillRect(dcx - 900, dy2 - 600, 1800, 1400);
-    desertGraphics.setAlpha(0);
-    desertGraphics.setDepth(-999);
-
     // Store references for ZoneSystem to reveal
     this.data.set('tundraOverlay', tundraGraphics);
-    this.data.set('desertOverlay', desertGraphics);
+    // Desert uses actual tiles now — no colour overlay needed
+    this.data.set('desertOverlay', this.add.graphics()); // empty placeholder
   }
 
   update(time: number, delta: number): void {
