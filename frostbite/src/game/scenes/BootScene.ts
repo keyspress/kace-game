@@ -6,12 +6,20 @@ export class BootScene extends Phaser.Scene {
   }
 
   preload(): void {
-    // Phase 1: no external assets — all entities are drawn as colored rectangles.
-    // Phase 2+: load spritesheets and tilemaps here.
+    this.load.image('player',           'assets/Player.png');
+    this.load.image('axe',              'assets/Axe.png');
+    this.load.image('tree',             'assets/Tree.png');
+    this.load.image('rock',             'assets/Rock.png');
+    this.load.image('bear',             'assets/Bear.png');
+    this.load.image('drop-wood',        'assets/drop-wood.png');
+    this.load.image('drop-meat',        'assets/drop-meat.png');
+    this.load.image('drop-stone',       'assets/drop-stone.png');
+    this.load.image('ground-light',     'assets/Ground_Texture.png');
+    this.load.image('ground-dark',      'assets/Ground_Texture_Dark.png');
   }
 
   create(): void {
     this.scene.start('WorldScene');
-    this.scene.launch('UIScene'); // runs in parallel on top of WorldScene
+    this.scene.launch('UIScene');
   }
 }

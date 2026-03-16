@@ -160,29 +160,23 @@ export class WorldScene extends Phaser.Scene {
   }
 
   private drawFloor(): void {
-    const graphics = this.add.graphics();
+    // Tile images are 1024×1536; display as 64×32 isometric diamonds
     const tileW = 64;
     const tileH = 32;
+    const scaleX = tileW / 1024;
+    const scaleY = tileH / 1536;
     const range = 80;
 
     for (let row = -range; row < range; row++) {
       for (let col = -range; col < range * 3; col++) {
         const isoX = (col - row) * (tileW / 2);
         const isoY = (col + row) * (tileH / 2);
-        const shade = (col + row) % 2 === 0 ? 0xd8ecf3 : 0xc5dfe8;
-        graphics.fillStyle(shade, 1);
-        graphics.fillPoints(
-          [
-            { x: isoX,             y: isoY + tileH / 2 },
-            { x: isoX + tileW / 2, y: isoY },
-            { x: isoX + tileW,     y: isoY + tileH / 2 },
-            { x: isoX + tileW / 2, y: isoY + tileH },
-          ],
-          true
-        );
+        const key = (col + row) % 2 === 0 ? 'ground-light' : 'ground-dark';
+        const tile = this.add.image(isoX + tileW / 2, isoY + tileH / 2, key);
+        tile.setScale(scaleX, scaleY);
+        tile.setDepth(-1000);
       }
     }
-    graphics.setDepth(-1000);
 
     // Bear zone warm overlay
     const bx = this.scale.width / 2 + BEAR_ZONE_OFFSET_X;
