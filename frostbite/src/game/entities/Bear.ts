@@ -22,6 +22,8 @@ export class Bear extends Phaser.GameObjects.Sprite {
   private staggerUntil: number = 0;
   private healthBar!: Phaser.GameObjects.Graphics;
   private readonly maxHealth = 8;
+  private walkTime: number = 0;
+  private baseScaleY: number = SCALE_Y;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'bear');
@@ -115,7 +117,7 @@ export class Bear extends Phaser.GameObjects.Sprite {
     });
   }
 
-  update(time: number, _delta: number): void {
+  update(time: number, delta: number): void {
     if (!this.isAlive) return;
     this.setDepth(this.y);
     this.updateHealthBar();
@@ -123,6 +125,7 @@ export class Bear extends Phaser.GameObjects.Sprite {
     const body = this.body as Phaser.Physics.Arcade.Body;
     if (time < this.staggerUntil) {
       body.setVelocity(0, 0);
+      this.setScale(SCALE_X, this.baseScaleY);
       return;
     }
 
@@ -133,8 +136,17 @@ export class Bear extends Phaser.GameObjects.Sprite {
       body.setVelocity((dx / dist) * this.wanderSpeed, (dy / dist) * this.wanderSpeed);
       if (dx < 0) this.setFlipX(true);
       else this.setFlipX(false);
+
+      // Lumbering walk: bob up/down and squash/stretch
+      this.walkTime += delta;
+      const bob = Math.sin(this.walkTime * 0.008) * 0.5; // vertical bob
+      const squash = Math.abs(Math.sin(this.walkTime * 0.008)) * 0.015; // squash on stride
+      this.setScale(SCALE_X * (1 + squash), this.baseScaleY * (1 - squash * 0.5));
+      this.y += bob * 0.08;
     } else {
       body.setVelocity(0, 0);
+      this.walkTime = 0;
+      this.setScale(SCALE_X, this.baseScaleY);
     }
   }
 }
