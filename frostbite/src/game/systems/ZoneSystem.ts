@@ -3,11 +3,13 @@ import { useGameStore } from '../../store/gameStore';
 
 const BEAR_TERRITORY_THRESHOLD  = 5;  // TODO: restore to 500
 const ROCKY_TUNDRA_THRESHOLD    = 10; // TODO: restore to 300
+const DESERT_THRESHOLD          = 8;  // TODO: restore to 200 (wood)
 
 export class ZoneSystem {
   private scene: Phaser.Scene;
   private bearZoneUnlocked: boolean   = false;
   private tundraZoneUnlocked: boolean = false;
+  private desertZoneUnlocked: boolean = false;
   private notificationShowing: boolean = false;
 
   constructor(scene: Phaser.Scene) {
@@ -23,7 +25,13 @@ export class ZoneSystem {
       this.tundraZoneUnlocked = true;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (scene as any).spawnTundra?.();
-      this.revealTundraOverlay(true);
+      this.revealOverlay('tundraOverlay', true);
+    }
+    if (unlockedZones.includes('desert')) {
+      this.desertZoneUnlocked = true;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (scene as any).spawnDesert?.();
+      this.revealOverlay('desertOverlay', true);
     }
   }
 
@@ -35,13 +43,18 @@ export class ZoneSystem {
     }
     if (this.bearZoneUnlocked && !this.tundraZoneUnlocked && meatTotal >= ROCKY_TUNDRA_THRESHOLD) {
       this.unlockZone('rocky-tundra', '🪨 Rocky Tundra Unlocked!', 'spawnTundra');
-      this.revealTundraOverlay(false);
+      this.revealOverlay('tundraOverlay', false);
+    }
+    if (!this.desertZoneUnlocked && woodTotal >= DESERT_THRESHOLD) {
+      this.unlockZone('desert', '🏜️ Desert Unlocked!', 'spawnDesert');
+      this.revealOverlay('desertOverlay', false);
     }
   }
 
   private unlockZone(id: string, message: string, spawnMethod: string): void {
     if (id === 'bear-territory') this.bearZoneUnlocked = true;
     if (id === 'rocky-tundra')   this.tundraZoneUnlocked = true;
+    if (id === 'desert')         this.desertZoneUnlocked = true;
 
     useGameStore.getState().unlockZone(id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -49,17 +62,13 @@ export class ZoneSystem {
     this.showUnlockNotification(message);
   }
 
-  private revealTundraOverlay(instant: boolean): void {
-    const overlay = this.scene.data.get('tundraOverlay') as Phaser.GameObjects.Graphics | undefined;
+  private revealOverlay(key: string, instant: boolean): void {
+    const overlay = this.scene.data.get(key) as Phaser.GameObjects.Graphics | undefined;
     if (!overlay) return;
-    if (instant) {
-      overlay.setAlpha(0.4);
-      return;
-    }
-    // Fog-lifts animation: flash then fade in
+    if (instant) { overlay.setAlpha(0.5); return; }
     this.scene.tweens.add({
       targets: overlay,
-      alpha: { from: 0, to: 0.4 },
+      alpha: { from: 0, to: 0.5 },
       duration: 2000,
       ease: 'Sine.easeInOut',
     });

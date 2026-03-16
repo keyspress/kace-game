@@ -5,6 +5,7 @@ import { FireballOrbit } from '../entities/FireballOrbit';
 import { KnifeOrbit } from '../entities/KnifeOrbit';
 import { Tree } from '../entities/Tree';
 import { Bear } from '../entities/Bear';
+import { Scorpion } from '../entities/Scorpion';
 import { InputSystem } from '../systems/InputSystem';
 import { ZoneSystem } from '../systems/ZoneSystem';
 import { ResourceDropPool } from '../systems/ResourceDropPool';
@@ -54,11 +55,23 @@ const BEAR_ZONE_TREES = generateTreeGrid(16, 14, 90, 80, 0);
 export const TUNDRA_ZONE_OFFSET_X = 1900;
 const TUNDRA_TREE_POSITIONS = generateTreeGrid(14, 12, 90, 80, 0);
 
+// Desert sits below the forest (positive Y offset)
+export const DESERT_ZONE_OFFSET_Y = 900;
+// Sparse cacti — use rock texture with green tint, fewer and more spread out
+const DESERT_CACTUS_POSITIONS = generateTreeGrid(12, 10, 120, 100, 0).filter((_, i) => i % 3 !== 0);
+const SCORPION_SPAWN_POSITIONS: { x: number; y: number }[] = [
+  { x:  80,  y:  60 }, { x: -100, y:  140 }, { x:  220, y: -60 },
+  { x: -180, y: -80 }, { x:  320, y:  100 }, { x: -280, y: 160 },
+  { x:  100, y: -200 }, { x:  -60, y: 220 }, { x:  260, y: -160 },
+  { x: -220, y: -180 },
+];
+
 export class WorldScene extends Phaser.Scene {
   player!: Player;
   weapons: AnyWeapon[] = [];
   private trees: Tree[] = [];
   private bears: Bear[] = [];
+  private scorpions: Scorpion[] = [];
   private zoneSystem!: ZoneSystem;
   private snow!: Phaser.GameObjects.Particles.ParticleEmitter;
   dropPool: ResourceDropPool = new ResourceDropPool();
@@ -145,6 +158,20 @@ export class WorldScene extends Phaser.Scene {
     this.setupOverlaps();
   }
 
+  spawnDesert(): void {
+    const cx = this.scale.width / 2;
+    const cy = this.scale.height / 2;
+    DESERT_CACTUS_POSITIONS.forEach(({ x, y }) => {
+      const cactus = new Tree(this, cx + x, cy + DESERT_ZONE_OFFSET_Y + y - 24, 'stone', 3);
+      cactus.setTint(0x6baa3a); // green tint to make rocks look like cacti
+      this.trees.push(cactus);
+    });
+    SCORPION_SPAWN_POSITIONS.forEach(({ x, y }) => {
+      this.scorpions.push(new Scorpion(this, cx + x, cy + DESERT_ZONE_OFFSET_Y + y));
+    });
+    this.setupOverlaps();
+  }
+
   spawnTundra(): void {
     const cx = this.scale.width / 2;
     const cy = this.scale.height / 2;
@@ -180,11 +207,23 @@ export class WorldScene extends Phaser.Scene {
           this.bears = this.bears.filter((br) => br.active);
         }
       });
+
+      this.physics.add.overlap(weapon, this.scorpions, (_axe, _scorpion) => {
+        const w = _axe as AnyWeapon;
+        const s = _scorpion as Scorpion;
+        const time = this.time.now;
+        if (w.canHit(s.id, time)) {
+          w.recordHit(s.id, time);
+          s.hit(w.damage, this);
+          this.scorpions = this.scorpions.filter((sc) => sc.active);
+        }
+      });
     });
   }
 
   addTree(tree: Tree): void { this.trees.push(tree); this.setupOverlaps(); }
   addBear(bear: Bear): void { this.bears.push(bear); this.setupOverlaps(); }
+  addScorpion(scorpion: Scorpion): void { this.scorpions.push(scorpion); this.setupOverlaps(); }
   switchCharacter(character: CharacterType): void {
     this.player.switchCharacter(character);
     this.rebuildWeapons(character);
@@ -249,8 +288,18 @@ export class WorldScene extends Phaser.Scene {
     tundraGraphics.setAlpha(0);
     tundraGraphics.setDepth(-999);
 
-    // Store reference for ZoneSystem to reveal
+    // Desert zone warm sand overlay (starts hidden, revealed on unlock)
+    const dcx = this.scale.width / 2;
+    const dy2 = this.scale.height / 2 + DESERT_ZONE_OFFSET_Y;
+    const desertGraphics = this.add.graphics();
+    desertGraphics.fillStyle(0xe8c97a, 0.5);
+    desertGraphics.fillRect(dcx - 700, dy2 - 400, 1400, 900);
+    desertGraphics.setAlpha(0);
+    desertGraphics.setDepth(-999);
+
+    // Store references for ZoneSystem to reveal
     this.data.set('tundraOverlay', tundraGraphics);
+    this.data.set('desertOverlay', desertGraphics);
   }
 
   update(time: number, delta: number): void {
@@ -258,6 +307,7 @@ export class WorldScene extends Phaser.Scene {
     this.weapons.forEach((w) => w.update(time, delta));
     this.trees.forEach((t) => t.update());
     this.bears.forEach((b) => b.update(time, delta));
+    this.scorpions.forEach((s) => s.update(time, delta));
     this.zoneSystem.update();
 
     const { upgrades } = useGameStore.getState();
