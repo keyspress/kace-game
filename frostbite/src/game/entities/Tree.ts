@@ -50,9 +50,11 @@ export class Tree extends Phaser.GameObjects.Sprite {
     const hb = resourceType === 'stone' ? ROCK_HITBOX : TREE_HITBOX;
     const body = this.body as Phaser.Physics.Arcade.StaticBody;
     body.setSize(hb.w, hb.h);
+    const dispW = this.displayWidth;
+    const dispH = this.displayHeight;
     body.setOffset(
-      (this.width - hb.w) / 2,
-      this.height - hb.h - 2
+      (dispW - hb.w) / 2,
+      dispH - hb.h - 2
     );
 
     this.setDepth(y);

@@ -37,7 +37,7 @@ export class Bear extends Phaser.GameObjects.Sprite {
     const body = this.body as Phaser.Physics.Arcade.Body;
     body.setCollideWorldBounds(false);
     body.setSize(HITBOX_W, HITBOX_H);
-    body.setOffset((this.width - HITBOX_W) / 2, this.height - HITBOX_H - 2);
+    body.setOffset((this.displayWidth - HITBOX_W) / 2, this.displayHeight - HITBOX_H - 2);
     this.setDepth(y);
     this.healthBar = scene.add.graphics();
     this.pickNewWanderTarget(scene);

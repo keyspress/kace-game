@@ -20,8 +20,8 @@ export class Player extends Phaser.GameObjects.Sprite {
     const body = this.body as Phaser.Physics.Arcade.Body;
     body.setSize(HITBOX_W, HITBOX_H);
     body.setOffset(
-      (this.width - HITBOX_W) / 2,
-      this.height - HITBOX_H - 4
+      (this.displayWidth - HITBOX_W) / 2,
+      this.displayHeight - HITBOX_H - 4
     );
     this.setDepth(y);
   }
