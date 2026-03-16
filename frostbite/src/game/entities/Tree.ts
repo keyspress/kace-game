@@ -10,9 +10,9 @@ const TREE_SCALE_Y  = 96 / 1536;
 const ROCK_SCALE_X  = 64 / 1024;
 const ROCK_SCALE_Y  = 48 / 1536;
 
-// Physics hitbox sizes
-const TREE_HITBOX = { w: 20, h: 20 };
-const ROCK_HITBOX = { w: 28, h: 20 };
+// Physics hitbox sizes (covers full visible sprite area)
+const TREE_HITBOX = { w: 20, h: 72 };
+const ROCK_HITBOX = { w: 32, h: 36 };
 
 export class Tree extends Phaser.GameObjects.Sprite {
   health: number;
@@ -51,10 +51,11 @@ export class Tree extends Phaser.GameObjects.Sprite {
     const body = this.body as Phaser.Physics.Arcade.StaticBody;
     body.setSize(hb.w, hb.h);
     const dispW = this.displayWidth;
-    const dispH = this.displayHeight;
+    // Offset is from top-left of displayed sprite.
+    // Center horizontally; start 4px from the top so the hitbox covers the full trunk.
     body.setOffset(
       (dispW - hb.w) / 2,
-      dispH - hb.h - 2
+      4
     );
 
     this.setDepth(y);
