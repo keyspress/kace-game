@@ -6,6 +6,7 @@ import { KnifeOrbit } from '../entities/KnifeOrbit';
 import { Tree } from '../entities/Tree';
 import { Bear } from '../entities/Bear';
 import { Scorpion } from '../entities/Scorpion';
+import { Cactus } from '../entities/Cactus';
 import { InputSystem } from '../systems/InputSystem';
 import { ZoneSystem } from '../systems/ZoneSystem';
 import { ResourceDropPool } from '../systems/ResourceDropPool';
@@ -72,6 +73,7 @@ export class WorldScene extends Phaser.Scene {
   private trees: Tree[] = [];
   private bears: Bear[] = [];
   private scorpions: Scorpion[] = [];
+  private cacti: Cactus[] = [];
   private zoneSystem!: ZoneSystem;
   private snow!: Phaser.GameObjects.Particles.ParticleEmitter;
   dropPool: ResourceDropPool = new ResourceDropPool();
@@ -162,9 +164,7 @@ export class WorldScene extends Phaser.Scene {
     const cx = this.scale.width / 2;
     const cy = this.scale.height / 2;
     DESERT_CACTUS_POSITIONS.forEach(({ x, y }) => {
-      const cactus = new Tree(this, cx + x, cy + DESERT_ZONE_OFFSET_Y + y - 24, 'stone', 3);
-      cactus.setTint(0x6baa3a); // green tint to make rocks look like cacti
-      this.trees.push(cactus);
+      this.cacti.push(new Cactus(this, cx + x, cy + DESERT_ZONE_OFFSET_Y + y));
     });
     SCORPION_SPAWN_POSITIONS.forEach(({ x, y }) => {
       this.scorpions.push(new Scorpion(this, cx + x, cy + DESERT_ZONE_OFFSET_Y + y));
@@ -208,6 +208,17 @@ export class WorldScene extends Phaser.Scene {
         }
       });
 
+      this.physics.add.overlap(weapon, this.cacti, (_axe, _cactus) => {
+        const w = _axe as AnyWeapon;
+        const c = _cactus as Cactus;
+        const time = this.time.now;
+        if (w.canHit(c.id, time)) {
+          w.recordHit(c.id, time);
+          c.hit(w.damage, this);
+          this.cacti = this.cacti.filter((ca) => ca.active);
+        }
+      });
+
       this.physics.add.overlap(weapon, this.scorpions, (_axe, _scorpion) => {
         const w = _axe as AnyWeapon;
         const s = _scorpion as Scorpion;
@@ -224,6 +235,7 @@ export class WorldScene extends Phaser.Scene {
   addTree(tree: Tree): void { this.trees.push(tree); this.setupOverlaps(); }
   addBear(bear: Bear): void { this.bears.push(bear); this.setupOverlaps(); }
   addScorpion(scorpion: Scorpion): void { this.scorpions.push(scorpion); this.setupOverlaps(); }
+  addCactus(cactus: Cactus): void { this.cacti.push(cactus); this.setupOverlaps(); }
   switchCharacter(character: CharacterType): void {
     this.player.switchCharacter(character);
     this.rebuildWeapons(character);
@@ -308,6 +320,7 @@ export class WorldScene extends Phaser.Scene {
     this.trees.forEach((t) => t.update());
     this.bears.forEach((b) => b.update(time, delta));
     this.scorpions.forEach((s) => s.update(time, delta));
+    this.cacti.forEach((c) => c.update());
     this.zoneSystem.update();
 
     const { upgrades } = useGameStore.getState();
