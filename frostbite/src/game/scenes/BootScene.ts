@@ -7,6 +7,7 @@ export class BootScene extends Phaser.Scene {
 
   preload(): void {
     this.load.image('player',           'assets/Player.png');
+    this.load.spritesheet('player-walk', 'assets/player_walking.png', { frameWidth: 384, frameHeight: 1024 });
     this.load.image('axe',              'assets/Axe.png');
     this.load.image('tree',             'assets/Tree.png');
     this.load.image('rock',             'assets/Rock.png');
