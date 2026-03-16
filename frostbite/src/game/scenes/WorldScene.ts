@@ -9,6 +9,8 @@ import { ResourceDropPool } from '../systems/ResourceDropPool';
 import { audioSystem } from '../systems/AudioSystem';
 import { useGameStore } from '../../store/gameStore';
 
+export type CharacterType = 'knight' | 'mage' | 'rogue';
+
 const FOREST_TREES: { x: number; y: number }[] = [
   { x:  150, y:   60 }, { x: -120, y:   80 }, { x:  220, y: -100 },
   { x: -200, y: -130 }, { x:   80, y:  180 }, { x: -160, y:  200 },
@@ -135,6 +137,7 @@ export class WorldScene extends Phaser.Scene {
 
   addTree(tree: Tree): void { this.trees.push(tree); this.setupOverlaps(); }
   addBear(bear: Bear): void { this.bears.push(bear); this.setupOverlaps(); }
+  switchCharacter(character: CharacterType): void { this.player.switchCharacter(character); }
 
   private createSnow(): void {
     // Use Phaser's built-in particle system with a white square texture

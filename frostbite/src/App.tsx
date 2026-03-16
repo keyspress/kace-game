@@ -4,6 +4,7 @@ import { App as CapApp } from '@capacitor/app';
 import { PhaserGame } from './game/PhaserGame';
 import { ResourceBar } from './ui/ResourceBar';
 import { UpgradeShop } from './ui/UpgradeShop';
+import { CharacterSelect } from './ui/CharacterSelect';
 import { saveGame } from './store/persistence';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
       <PhaserGame onGameReady={handleGameReady} />
       <ResourceBar />
       <UpgradeShop gameEvents={gameEvents} />
+      <CharacterSelect gameEvents={gameEvents} />
     </div>
   );
 }

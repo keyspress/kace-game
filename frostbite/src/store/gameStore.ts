@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+export type CharacterType = 'knight' | 'mage' | 'rogue';
+
 interface GameState {
   wood: number;
   meat: number;
@@ -10,11 +12,13 @@ interface GameState {
   upgrades: Record<string, number>;
   unlockedZones: string[];
   shopOpen: boolean;
+  activeCharacter: CharacterType;
   addResource: (type: 'wood' | 'meat' | 'stone', amount: number) => void;
   spendResource: (type: 'wood' | 'meat' | 'stone', amount: number) => boolean;
   purchaseUpgrade: (upgradeId: string) => void;
   unlockZone: (zoneId: string) => void;
   setShopOpen: (open: boolean) => void;
+  setCharacter: (character: CharacterType) => void;
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -27,6 +31,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   upgrades: {},
   unlockedZones: ['forest'],
   shopOpen: false,
+  activeCharacter: 'rogue',
 
   addResource: (type, amount) =>
     set((state) => ({
@@ -57,4 +62,5 @@ export const useGameStore = create<GameState>((set, get) => ({
     })),
 
   setShopOpen: (open) => set({ shopOpen: open }),
+  setCharacter: (character) => set({ activeCharacter: character }),
 }));
