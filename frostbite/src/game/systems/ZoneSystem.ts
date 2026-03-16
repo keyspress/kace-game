@@ -1,8 +1,8 @@
 import Phaser from 'phaser';
 import { useGameStore } from '../../store/gameStore';
 
-const BEAR_TERRITORY_THRESHOLD  = 500;
-const ROCKY_TUNDRA_THRESHOLD    = 300; // lifetime meat
+const BEAR_TERRITORY_THRESHOLD  = 5;  // TODO: restore to 500
+const ROCKY_TUNDRA_THRESHOLD    = 10; // TODO: restore to 300
 
 export class ZoneSystem {
   private scene: Phaser.Scene;
