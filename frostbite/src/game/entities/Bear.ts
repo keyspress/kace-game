@@ -5,8 +5,8 @@ import { audioSystem } from '../systems/AudioSystem';
 // Source image: 1024×1536 — display at 64×48
 const SCALE_X = 64 / 1024;
 const SCALE_Y = 48 / 1536;
-const HITBOX_W = 36;
-const HITBOX_H = 28;
+const HITBOX_W = 52;
+const HITBOX_H = 40;
 
 export class Bear extends Phaser.GameObjects.Sprite {
   health: number = 8;
