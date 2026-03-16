@@ -5,25 +5,21 @@ const TEXTURE_KEY = 'knife-texture';
 
 function ensureTexture(scene: Phaser.Scene): void {
   if (scene.textures.exists(TEXTURE_KEY)) return;
-  // Draw a small knife: thin blade + handle
+  // Draw a slim dagger: long blade, tiny handle
   const g = scene.make.graphics({ x: 0, y: 0 });
-  // Blade — bright silver triangle
+  // Blade — long silver triangle (tip at top)
   g.fillStyle(0xdce8f0, 1);
-  g.fillTriangle(16, 0, 20, 12, 12, 12);
-  // Blade edge highlight
+  g.fillTriangle(16, 0, 19, 18, 13, 18);
+  // Blade centre highlight
   g.fillStyle(0xffffff, 0.8);
-  g.fillTriangle(16, 1, 18, 10, 16, 10);
-  // Guard
+  g.fillTriangle(16, 1, 17, 15, 16, 15);
+  // Guard — narrow bar
   g.fillStyle(0x8b6914, 1);
-  g.fillRect(10, 12, 12, 3);
-  // Handle
+  g.fillRect(11, 18, 10, 2);
+  // Handle — short and thin
   g.fillStyle(0x5a3a1a, 1);
-  g.fillRect(13, 15, 6, 8);
-  // Handle wrap
-  g.fillStyle(0x8b6914, 0.7);
-  g.fillRect(13, 17, 6, 2);
-  g.fillRect(13, 20, 6, 2);
-  g.generateTexture(TEXTURE_KEY, 32, 24);
+  g.fillRect(14, 20, 4, 4);
+  g.generateTexture(TEXTURE_KEY, 32, 26);
   g.destroy();
 }
 
