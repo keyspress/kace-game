@@ -1,9 +1,9 @@
 import Phaser from 'phaser';
 import { Player } from './Player';
 
-// Source image: 1024×1536 — display at 32×24
-const SCALE_X = 32 / 1024;
-const SCALE_Y = 24 / 1536;
+// Source image: 1024×1536 — display at 64×48
+const SCALE_X = 64 / 1024;
+const SCALE_Y = 48 / 1536;
 
 export class WeaponOrbit extends Phaser.GameObjects.Sprite {
   private player: Player;
