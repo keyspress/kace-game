@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { Player } from '../entities/Player';
 import { WeaponOrbit } from '../entities/WeaponOrbit';
 import { FireballOrbit } from '../entities/FireballOrbit';
+import { KnifeOrbit } from '../entities/KnifeOrbit';
 import { Tree } from '../entities/Tree';
 import { Bear } from '../entities/Bear';
 import { InputSystem } from '../systems/InputSystem';
@@ -12,7 +13,7 @@ import { useGameStore } from '../../store/gameStore';
 
 export type CharacterType = 'knight' | 'mage' | 'rogue';
 
-type AnyWeapon = WeaponOrbit | FireballOrbit;
+type AnyWeapon = WeaponOrbit | FireballOrbit | KnifeOrbit;
 
 const FOREST_TREES: { x: number; y: number }[] = [
   { x:  150, y:   60 }, { x: -120, y:   80 }, { x:  220, y: -100 },
@@ -86,6 +87,11 @@ export class WorldScene extends Phaser.Scene {
       const fb = new FireballOrbit(this, this.player, slotIndex, angleOffset);
       fb.angleOffset = angleOffset;
       return fb;
+    }
+    if (character === 'rogue') {
+      const knife = new KnifeOrbit(this, this.player, slotIndex, angleOffset);
+      knife.angleOffset = angleOffset;
+      return knife;
     }
     const axe = new WeaponOrbit(this, this.player, slotIndex, angleOffset);
     axe.angleOffset = angleOffset;
