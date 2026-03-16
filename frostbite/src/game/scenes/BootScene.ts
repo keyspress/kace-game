@@ -11,14 +11,17 @@ export class BootScene extends Phaser.Scene {
     for (let i = 1; i <= 6;  i++) this.load.image(`rogue-walk-${i}`, `assets/Rogue/Walk/walk${i}.png`);
     for (let i = 1; i <= 18; i++) this.load.image(`rogue-idle-${i}`, `assets/Rogue/Idle/idle${i}.png`);
     for (let i = 1; i <= 8;  i++) this.load.image(`rogue-run-${i}`,  `assets/Rogue/Run/run${i}.png`);
+    for (let i = 1; i <= 7;  i++) this.load.image(`rogue-jump-${i}`, `assets/Rogue/Jump/jump${i}.png`);
     // Knight frames
     for (let i = 1; i <= 6;  i++) this.load.image(`knight-walk-${i}`, `assets/Knight/Walk/walk${i}.png`);
     for (let i = 1; i <= 12; i++) this.load.image(`knight-idle-${i}`, `assets/Knight/Idle/idle${i}.png`);
     for (let i = 1; i <= 8;  i++) this.load.image(`knight-run-${i}`,  `assets/Knight/Run/run${i}.png`);
+    for (let i = 1; i <= 7;  i++) this.load.image(`knight-jump-${i}`, `assets/Knight/Jump/jump${i}.png`);
     // Mage frames
     for (let i = 1; i <= 6;  i++) this.load.image(`mage-walk-${i}`, `assets/Mage/Walk/walk${i}.png`);
     for (let i = 1; i <= 14; i++) this.load.image(`mage-idle-${i}`, `assets/Mage/Idle/idle${i}.png`);
     for (let i = 1; i <= 8;  i++) this.load.image(`mage-run-${i}`,  `assets/Mage/Run/run${i}.png`);
+    for (let i = 1; i <= 7;  i++) this.load.image(`mage-jump-${i}`, `assets/Mage/Jump/jump${i}.png`);
     this.load.image('axe',              'assets/Axe.png');
     this.load.image('tree',             'assets/Tree.png');
     this.load.image('rock',             'assets/Rock.png');

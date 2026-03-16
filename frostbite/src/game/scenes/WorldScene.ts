@@ -138,6 +138,7 @@ export class WorldScene extends Phaser.Scene {
   addTree(tree: Tree): void { this.trees.push(tree); this.setupOverlaps(); }
   addBear(bear: Bear): void { this.bears.push(bear); this.setupOverlaps(); }
   switchCharacter(character: CharacterType): void { this.player.switchCharacter(character); }
+  playerJump(): void { this.player.jump(this); }
 
   private createSnow(): void {
     // Use Phaser's built-in particle system with a white square texture

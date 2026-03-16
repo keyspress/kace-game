@@ -5,6 +5,7 @@ import { PhaserGame } from './game/PhaserGame';
 import { ResourceBar } from './ui/ResourceBar';
 import { UpgradeShop } from './ui/UpgradeShop';
 import { CharacterSelect } from './ui/CharacterSelect';
+import { JumpButton } from './ui/JumpButton';
 import { saveGame } from './store/persistence';
 
 export default function App() {
@@ -40,6 +41,7 @@ export default function App() {
       <ResourceBar />
       <UpgradeShop gameEvents={gameEvents} />
       <CharacterSelect gameEvents={gameEvents} />
+      <JumpButton gameEvents={gameEvents} />
     </div>
   );
 }

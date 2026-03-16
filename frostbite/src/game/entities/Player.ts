@@ -6,16 +6,17 @@ const SCALE = 64 / 128;
 const HITBOX_W = 24;
 const HITBOX_H = 24;
 
-const CHAR_FRAMES: Record<CharacterType, { idle: number; walk: number; run: number }> = {
-  rogue:  { idle: 18, walk: 6, run: 8 },
-  knight: { idle: 12, walk: 6, run: 8 },
-  mage:   { idle: 14, walk: 6, run: 8 },
+const CHAR_FRAMES: Record<CharacterType, { idle: number; walk: number; run: number; jump: number }> = {
+  rogue:  { idle: 18, walk: 6, run: 8, jump: 7 },
+  knight: { idle: 12, walk: 6, run: 8, jump: 7 },
+  mage:   { idle: 14, walk: 6, run: 8, jump: 7 },
 };
 
 export class Player extends Phaser.GameObjects.Sprite {
   speed: number = 200;
   velocity: { x: number; y: number } = { x: 0, y: 0 };
   private currentCharacter: CharacterType = 'rogue';
+  private isJumping: boolean = false;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'rogue-idle-1');
@@ -61,6 +62,44 @@ export class Player extends Phaser.GameObjects.Sprite {
         frameRate: 12,
         repeat: -1,
       });
+
+      scene.anims.create({
+        key: `${char}-jump`,
+        frames: Array.from({ length: f.jump }, (_, i) => ({ key: `${char}-jump-${i + 1}` })),
+        frameRate: 12,
+        repeat: 0,
+      });
+    });
+  }
+
+  jump(scene: Phaser.Scene): void {
+    if (this.isJumping) return;
+    this.isJumping = true;
+    const baseY = this.y;
+
+    this.play(`${this.currentCharacter}-jump`);
+
+    scene.tweens.add({
+      targets: this,
+      y: baseY - 40,
+      duration: 280,
+      ease: 'Quad.easeOut',
+      onComplete: () => {
+        scene.tweens.add({
+          targets: this,
+          y: baseY,
+          duration: 280,
+          ease: 'Quad.easeIn',
+          onComplete: () => {
+            this.isJumping = false;
+          },
+        });
+      },
+    });
+
+    this.once(Phaser.Animations.Events.ANIMATION_COMPLETE, () => {
+      if (this.isJumping) return; // still in air, let landing handle it
+      this.play(`${this.currentCharacter}-idle`);
     });
   }
 
@@ -79,12 +118,14 @@ export class Player extends Phaser.GameObjects.Sprite {
     const speed = Math.sqrt(this.velocity.x ** 2 + this.velocity.y ** 2);
     const currentAnim = this.anims.currentAnim?.key;
 
-    if (speed > 150) {
-      if (currentAnim !== `${char}-run`) this.play(`${char}-run`);
-    } else if (speed > 5) {
-      if (currentAnim !== `${char}-walk`) this.play(`${char}-walk`);
-    } else {
-      if (currentAnim !== `${char}-idle`) this.play(`${char}-idle`);
+    if (!this.isJumping) {
+      if (speed > 150) {
+        if (currentAnim !== `${char}-run`) this.play(`${char}-run`);
+      } else if (speed > 5) {
+        if (currentAnim !== `${char}-walk`) this.play(`${char}-walk`);
+      } else {
+        if (currentAnim !== `${char}-idle`) this.play(`${char}-idle`);
+      }
     }
 
     if (this.velocity.x < -5) this.setFlipX(true);

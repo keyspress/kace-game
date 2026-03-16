@@ -45,6 +45,12 @@ export function PhaserGame({ onGameReady }: Props) {
       worldScene?.switchCharacter(character as import('./scenes/WorldScene').CharacterType);
     });
 
+    // Forward jump to WorldScene
+    game.events.on('player:jump', () => {
+      const worldScene = game.scene.getScene('WorldScene') as WorldScene | null;
+      worldScene?.playerJump();
+    });
+
     onGameReady(game);
 
     return () => {
